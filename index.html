@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Assignment 1 </title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+body {margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;}
+header {text-align:center;padding:50px 20px;background:rgba(0,0,0,0.4);}
+h1 {font-size:2.5em;margin:0;}
+nav {display:flex;justify-content:center;gap:20px;background:#111;padding:10px;position:sticky;top:0;z-index:10;}
+nav a {color:#ffd369;text-decoration:none;font-weight:600;}
+section {margin:25px auto;padding:25px;max-width:1000px;background:rgba(255,255,255,0.08);border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.4);}
+h2 {color:#ffd369;border-bottom:2px solid #ffd369;padding-bottom:5px;}
+code {background:#000;padding:10px;display:block;border-radius:10px;overflow-x:auto;color:#00ffcc;}
+ul {line-height:1.8;}
+.diagram {text-align:center;padding:20px;background:#000;border-radius:10px;margin-top:15px;}
+.badge {display:inline-block;padding:5px 10px;background:#ffd369;color:#000;border-radius:8px;margin:5px;}
+footer {text-align:center;padding:20px;background:#000;margin-top:30px;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🚀 Containerization & DevOps Assignment 1</h1>
+<p>Submission by <b>Jaspinder Kaur</b></p>
+<div>
+<span class="badge">Docker</span>
+<span class="badge">PostgreSQL</span>
+<span class="badge">Macvlan</span>
+<span class="badge">Node.js</span>
+</div>
+</header>
+
+<nav>
+<a href="#objective">Objective</a>
+<a href="#stack">Tech Stack</a>
+<a href="#architecture">Architecture</a>
+<a href="#api">API</a>
+<a href="#docker">Docker</a>
+<a href="#compose">Compose</a>
+<a href="#network">Networking</a>
+<a href="#report">Report</a>
+</nav>
+
+<section id="objective">
+<h2>🎯 Objective</h2>
+<p>To design and deploy a production-ready containerized web application using Docker, PostgreSQL, and advanced networking with Macvlan/Ipvlan. This project demonstrates real-world DevOps practices including orchestration, networking, and optimization.</p>
+</section>
+
+<section id="stack">
+<h2>🧰 Technology Stack</h2>
+<ul>
+<li>Database: PostgreSQL</li>
+<li>Backend: Node.js + Express</li>
+<li>Containerization: Docker (Multi-stage builds)</li>
+<li>Orchestration: Docker Compose</li>
+<li>Networking: Macvlan / Ipvlan</li>
+</ul>
+</section>
+
+<section id="architecture">
+<h2>🏗️ Architecture</h2>
+<div class="diagram">
+Client (Browser/Postman)<br>⬇<br>
+Backend Container (Static IP)<br>⬇<br>
+PostgreSQL Container (Volume + Static IP)
+</div>
+<ul>
+<li>Containers have LAN IPs</li>
+<li>Backend communicates with DB internally</li>
+<li>Persistent storage via volumes</li>
+</ul>
+</section>
+
+<section id="api">
+<h2>🔗 API Endpoints</h2>
+<ul>
+<li>POST /data → Insert record</li>
+<li>GET /data → Fetch records</li>
+<li>GET /health → Healthcheck</li>
+</ul>
+<code>
+app.post('/data', ...);
+app.get('/data', ...);
+app.get('/health', ...);
+</code>
+</section>
+
+<section id="docker">
+<h2>🐳 Docker Implementation</h2>
+<ul>
+<li>Multi-stage builds used</li>
+<li>Alpine base image</li>
+<li>Non-root user security</li>
+<li>.dockerignore implemented</li>
+</ul>
+<code>
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app .
+CMD ["node","server.js"]
+</code>
+</section>
+
+<section id="compose">
+<h2>⚙️ Docker Compose</h2>
+<code>
+version: '3'
+services:
+  backend:
+    build: ./backend
+    networks:
+      mynet:
+        ipv4_address: 192.168.1.10
+
+  db:
+    build: ./database
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      mynet:
+        ipv4_address: 192.168.1.11
+
+volumes:
+  pgdata:
+</code>
+</section>
+
+<section id="network">
+<h2>🌐 Networking (Macvlan)</h2>
+<code>
+docker network create -d macvlan \
+--subnet=192.168.1.0/24 \
+--gateway=192.168.1.1 \
+-o parent=eth0 mynet
+</code>
+<ul>
+<li>Static IP assignment</li>
+<li>LAN access enabled</li>
+<li><b>Host isolation issue:</b> Host cannot communicate with containers</li>
+</ul>
+</section>
+
+<section id="report">
+<h2>📄 Report Summary</h2>
+<ul>
+<li>Optimized build reduces image size</li>
+<li>Macvlan vs Ipvlan comparison included</li>
+<li>Architecture diagram added</li>
+<li>Persistent storage validated</li>
+</ul>
+</section>
+
+<footer>
+<p>💻 DevOps Assignment | UPES | 2026</p>
+</footer>
+
+</body>
+</html>
